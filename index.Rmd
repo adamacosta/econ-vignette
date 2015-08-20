@@ -1,0 +1,102 @@
+---
+title: "US Census Bureau Economic Indicators"
+output: html_document
+---
+
+To install the datasets:
+
+```{r, eval = FALSE}
+devtools::install_github('adamacosta/econ')
+```
+
+Source: [US Census Bureau](http://www.census.gov/econ/currentdata/)
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+knitr::knit_hooks$set(htmlcap = function(before, options, envir) {
+    if (!before) {
+        paste0('<p class="caption">', options$htmlcap, '</p>')
+    }
+})
+```
+
+```{r}
+library(ggvis)
+library(zoo)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+
+data(nsror, package = 'econ')
+data(salesinventories, package = 'econ')
+data(housing, package = 'econ')
+data(construction, package = 'econ')
+```
+
+## Construction
+
+```{r}
+construction
+```
+
+```{r, htmlcap = 'Figure 1. New home permits, starts, and sales'}
+construction %>%
+    na.locf(fromLast = FALSE, na.rm = FALSE) %>%
+    gather(type, amount, -period) %>%
+    mutate(period = ymd(period), amount = as.numeric(amount)) %>%
+    mutate(amount = ifelse(is.na(amount), 0, amount)) %>%
+    ggvis(~period, ~amount, stroke = ~type) %>%
+    layer_lines() %>%
+    add_axis('y', title_offset = 80, title = 'thousands of units')
+```
+
+## Housing
+
+```{r}
+housing
+```
+
+```{r, htmlcap = 'Figure 1. Homeownership and vacancy rates'}
+housing %>%
+    na.locf(fromLast = FALSE, na.rm = FALSE) %>%
+    gather(type, amount, -period) %>%
+    mutate(period = ymd(period), amount = as.numeric(amount)) %>%
+    mutate(amount = ifelse(is.na(amount), 0, amount)) %>%
+    ggvis(~period, ~amount, stroke = ~type) %>%
+    layer_lines() %>%
+    add_axis('y', title_offset = 80, title = 'percent')
+```
+
+## Sales and Inventories
+
+```{r}
+salesinventories
+```
+
+```{r, htmlcap = 'Figure 1. Sales and inventories of select industries'}
+salesinventories %>%
+    na.locf(fromLast = FALSE, na.rm = FALSE) %>%
+    gather(type, amount, -period) %>%
+    mutate(period = ymd(period), amount = as.numeric(amount)) %>%
+    mutate(amount = ifelse(is.na(amount), 0, amount)) %>%
+    ggvis(~period, ~amount, stroke = ~type) %>%
+    layer_lines() %>%
+    add_axis('y', title_offset = 80, title = 'millions USD')
+```
+
+## Net sales, receipts, and operating revenues
+
+```{r}
+nsror
+```
+
+```{r, htmlcap = 'Figure 1. Net sales, receipts, and operating revenues'}
+nsror %>%
+    na.locf(fromLast = FALSE, na.rm = FALSE) %>%
+    gather(type, amount, -period) %>%
+    mutate(period = ymd(period), amount = as.numeric(amount)) %>%
+    mutate(amount = ifelse(is.na(amount), 0, amount)) %>%
+    ggvis(~period, ~amount, stroke = ~type) %>%
+    layer_lines() %>%
+    add_axis('y', title_offset = 80, title = 'millions USD')
+```
